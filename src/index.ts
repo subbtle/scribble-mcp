@@ -53,8 +53,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     try {
       const response = await fetch(
-        // TODO: make this a server endpoint
-        "http://localhost:3001/api/v1/notes/latest",
+        "https://scribble-production-3976.up.railway.app/api/v1/notes/latest",
         {
           method: "GET",
           headers: {

@@ -38,7 +38,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     if (request.params.name === "getLatestNote") {
         const { userName, accessCode } = request.params.arguments;
         try {
-            const response = await fetch("http://localhost:3001/api/v1/notes/latest", {
+            const response = await fetch("https://scribble-production-3976.up.railway.app/api/v1/notes/latest", {
                 method: "GET",
                 headers: {
                     "x-username": userName,

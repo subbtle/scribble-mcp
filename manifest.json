@@ -1,0 +1,44 @@
+{
+  "dxt_version": "0.1",
+  "name": "scribble",
+  "version": "0.1.0",
+  "description": "MCP server for connecting to iPad handwriting",
+  "author": {
+    "name": "subbtle"
+  },
+  "user_config": {
+    "username": {
+      "type": "string",
+      "title": "Scribble Username",
+      "description": "Your username for Scribble authentication",
+      "required": true
+    },
+    "access_code": {
+      "type": "string",
+      "title": "Access Code",
+      "description": "Your access code for authentication",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "SCRIBBLE_USERNAME": "${user_config.username}",
+        "SCRIBBLE_ACCESS_CODE": "${user_config.access_code}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "getLatestNote",
+      "description": "Get the latest handwritten note for a user"
+    }
+  ],
+  "keywords": ["ipad", "handwriting", "drawing"],
+  "license": "MIT"
+}

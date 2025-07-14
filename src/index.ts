@@ -7,6 +7,17 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js"
 
+// Read credentials from environment variables (set by Desktop Extension)
+const SCRIBBLE_USERNAME = process.env.SCRIBBLE_USERNAME
+const SCRIBBLE_ACCESS_CODE = process.env.SCRIBBLE_ACCESS_CODE
+
+if (!SCRIBBLE_USERNAME || !SCRIBBLE_ACCESS_CODE) {
+  console.error(
+    "Missing required environment variables: SCRIBBLE_USERNAME and SCRIBBLE_ACCESS_CODE"
+  )
+  process.exit(1)
+}
+
 const server = new Server(
   {
     name: "scribble-mcp",
@@ -27,17 +38,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         description: "Get the latest handwritten note for a user",
         inputSchema: {
           type: "object",
-          properties: {
-            userName: {
-              type: "string",
-              description: "The username to get the latest note for",
-            },
-            accessCode: {
-              type: "string",
-              description: "The user's access code for authentication",
-            },
-          },
-          required: ["userName", "accessCode"],
+          properties: {},
+          required: [],
         },
       },
     ],
@@ -46,19 +48,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   if (request.params.name === "getLatestNote") {
-    const { userName, accessCode } = request.params.arguments as {
-      userName: string
-      accessCode: string
-    }
-
     try {
       const response = await fetch(
         "https://scribble-production-3976.up.railway.app/api/v1/notes/latest",
         {
           method: "GET",
           headers: {
-            "x-username": userName,
-            "x-access-code": accessCode,
+            "x-username": SCRIBBLE_USERNAME,
+            "x-access-code": SCRIBBLE_ACCESS_CODE,
             "Content-Type": "application/json",
           },
         }
@@ -84,11 +81,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
       }
 
+      // Fetch the actual image data
+      const imageResponse = await fetch(data.imageUrl)
+      if (!imageResponse.ok) {
+        throw new Error(`Failed to fetch image: ${imageResponse.status}`)
+      }
+      const imageBuffer = await imageResponse.arrayBuffer()
+      const base64Image = Buffer.from(imageBuffer).toString("base64")
+
       return {
         content: [
           {
             type: "image",
-            data: data.imageUrl,
+            data: base64Image,
             mimeType: "image/png",
           },
         ],
